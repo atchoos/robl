@@ -1,0 +1,100 @@
+-- UI Library
+local UILibrary = {}
+
+function UILibrary:CreateWindow(title)
+    local screenGui = Instance.new("ScreenGui")
+    local frame = Instance.new("Frame")
+    local titleLabel = Instance.new("TextLabel")
+
+    screenGui.Name = "CustomUI"
+    screenGui.Parent = game.CoreGui
+
+    frame.Name = "MainFrame"
+    frame.Parent = screenGui
+    frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    frame.BorderSizePixel = 0
+    frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+    frame.Size = UDim2.new(0, 300, 0, 200)
+    frame.Active = true
+    frame.Draggable = true
+
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Parent = frame
+    titleLabel.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    titleLabel.BorderSizePixel = 0
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.new(1, 1, 1)
+    titleLabel.TextSize = 18
+
+    return frame
+end
+
+function UILibrary:CreateButton(parent, text, onClick)
+    local button = Instance.new("TextButton")
+
+    button.Parent = parent
+    button.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    button.BorderSizePixel = 0
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0.5, -100, 0, 50)
+    button.Font = Enum.Font.SourceSansBold
+    button.Text = text
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.TextSize = 18
+
+    button.MouseButton1Click:Connect(onClick)
+
+    return button
+end
+
+-- Script para Copiar Skin
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+-- Função para copiar a skin
+local function copySkin(targetPlayer)
+    if targetPlayer and targetPlayer.Character then
+        local targetCharacter = targetPlayer.Character
+        local localCharacter = LocalPlayer.Character
+
+        if localCharacter and targetCharacter then
+            for _, part in pairs(localCharacter:GetChildren()) do
+                if part:IsA("Accessory") or part:IsA("Clothing") or part:IsA("BodyColors") then
+                    part:Destroy()
+                end
+            end
+
+            for _, part in pairs(targetCharacter:GetChildren()) do
+                if part:IsA("Accessory") then
+                    part:Clone().Parent = localCharacter
+                elseif part:IsA("Shirt") or part:IsA("Pants") then
+                    part:Clone().Parent = localCharacter
+                elseif part:IsA("BodyColors") then
+                    local bodyColors = part:Clone()
+                    bodyColors.Parent = localCharacter
+                    localCharacter.Head.Color = bodyColors.HeadColor3
+                    localCharacter.LeftArm.Color = bodyColors.LeftArmColor3
+                    localCharacter.RightArm.Color = bodyColors.RightArmColor3
+                    localCharacter.LeftLeg.Color = bodyColors.LeftLegColor3
+                    localCharacter.RightLeg.Color = bodyColors.RightLegColor3
+                    localCharacter.Torso.Color = bodyColors.TorsoColor3
+                end
+            end
+        end
+    end
+end
+
+-- Criação da interface
+local mainUI = UILibrary:CreateWindow("Skin Copier")
+local copyButton = UILibrary:CreateButton(mainUI, "Copiar Skin", function()
+    local target = Mouse.Target
+    if target and target.Parent then
+        local targetPlayer = Players:GetPlayerFromCharacter(target.Parent)
+        if targetPlayer and targetPlayer ~= LocalPlayer then
+            copySkin(targetPlayer)
+        end
+    end
+end)
